@@ -1,0 +1,82 @@
+FiberForce Example 09 — Geometric + Multi-Variable Sensitivity + Persistence Report
+Profile: geo-optimizer-athlete-2026
+Generated: 2026-06-03T20:59:07.204632
+Service: AnalysisService (FiberForce 0.5+ with 0.6 polish)
+  Calculator: SimplePeakForceCalculator
+  Reference: ReferenceData v0.2.2-phase4-multi-pos-geo-hardening — full confidence metadata on all tables (bench/squat/deadlift/ohp) + geometric MA preferred path when anthro provided. Lifts: bench, squat, deadlift, ohp. Geometric support: bench sternal + squat (glute/quad) + deadlift (glute/ham) + ohp (anterior + triceps; lateral via proxy)
+  Sensitivity (single + multi): Yes
+  Compare: Yes (routed through build+analyze)
+  Full lift parity: bench | squat | deadlift (conv+sumo) | ohp (standing/seated/strict + bottom/mid/lockout + multi-delt + triceps)
+  Multi-position: rich MultiPositionResult (aggregates, geo vs static, deltas); full duck-type compat with accumulators
+  Program-level accumulation: Yes (accumulate_regional_stress, accumulate_regional_volume, summarize_multi_position, summarize_regional_accumulation)
+  Persistence: Full via fiberforce.results + profiles (Saved*Run, profile-based multi-var)
+  CLI primary backend: Yes
+
+ATHLETIC PROFILE (drives all geometric calculations)
+  humerus_length_cm: 33.8
+  biacromial_width_cm: 39.5
+  torso_depth_at_chest_cm: 23.1
+  femur_length_cm: 44.8
+  tibia_length_cm: 38.7
+
+STUDIES EXECUTED & PERSISTED
+  1. Bench load × grip (static reference tables) → geo-optimizer-athlete-2026_bench_static_load_grip_20260603_2059
+  2. Bench load × grip (live geometric)        → geo-optimizer-athlete-2026_bench_geo_load_grip_20260603_2059
+  3. Squat load × stance (geometric via profile helper + rebuild) → geo-optimizer-athlete-2026_multi_squat_load_kg,stance_width_cm_20260603_2059
+
+COMBINED GEOMETRIC + MULTI-VAR PATTERN (the bleeding edge today)
+  - rebuild_multi receives the current (load, grip/stance) tuple
+  - It calls service.build_position(..., use_geometric=True, grip=..., stance=...)
+  - The builder internally calls ReferenceData.estimate_moment_arm which
+    dispatches to estimate_bench_sternal_ma or estimate_squat_glute_ma
+  - Result: every point in the sensitivity surface uses a moment arm that
+    is a continuous function of *your actual limb lengths + current grip/stance*
+  - Direct estimator functions are also available for custom math / debugging.
+
+WHAT THE DATA TELLS YOU (relative only)
+  - How much sternal demand changes across realistic grip widths at different loads
+  - Whether a wider stance on squat increases or decreases upper glute demand
+    for *your* femur/tibia ratio (the geometric model captures this)
+  - Interaction effects: does the grip that feels best at 100 kg still feel best
+    at 125 kg? (Multi-var surfaces reveal this; single-var sweeps cannot.)
+
+PERSISTENCE VALUE
+  - Both modeling approaches (static vs geometric) are saved under the same
+    profile name with timestamps and notes.
+  - Future you (or your coach) can load these exact runs and ask new questions
+    without having to remember or re-enter any measurements.
+  - The JSON files are plain text and version-control friendly.
+
+LIMITATIONS (READ THIS)
+  - Absolute force numbers remain ~100× too low (known torque unit bug in
+    calculations/peak_force.py). Use only relative deltas, slopes, and rankings.
+  - Geometric support is a prototype and limited:
+      • Bench: only sternal pec horizontal-adduction MA (shoulder)
+      • Squat: glute max hip-extension + vastus lateralis knee-extension MA
+      • All other regions, all of deadlift, most of OHP, and many variations
+        still use the static synthesized tables even when use_geometric=True.
+  - Multi-variable sensitivity performs sequential sweeps (one variable at a
+    time while others are held at their first listed value). True 2D grids +
+    heatmaps are the obvious next layer on top of this architecture.
+  - No velocity, no length-tension dynamics beyond the fixed 0.85 factor,
+    single-joint approximation, etc. See docs/limitations-deep-dive.md.
+
+RECOMMENDED REAL-WORLD USAGE
+  1. Measure yourself accurately (or use a good coach/physio).
+  2. Save once: fiberforce profile save <you> --humerus ... --femur ...
+  3. Copy this script, change PROFILE_NAME and the variable ranges to questions
+     that actually matter for your training (e.g. close-grip incline vs flat).
+  4. Run it before a new block; save the report + the run_ids.
+  5. After the block, re-run or load the old SavedSensitivityRun and compare
+     surfaces (or just look at the notes you attached).
+
+See also:
+  - Example 05 (pure geometric prototype)
+  - Example 06 (multi-var foundation + early geo combo)
+  - Example 08 (broader persistence recipes and helpers)
+  - src/fiberforce/reference/geometric.py (full model + assumptions)
+  - src/fiberforce/examples.py (the builders that now auto-wire geometric)
+
+Relative comparisons and interaction effects produced by these persisted
+geometric multi-var runs are the most trustworthy output FiberForce currently
+offers for personalized setup decisions.

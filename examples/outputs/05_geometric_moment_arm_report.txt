@@ -1,0 +1,33 @@
+FiberForce Geometric Moment Arm Prototype Report
+============================================================
+
+Prototype implementation of anthropometry-driven moment arm
+estimation to replace/augment static reference tables.
+
+Files added / modified:
+  - src/fiberforce/reference/geometric.py (new core module)
+  - src/fiberforce/reference/data.py (ReferenceData.estimate_moment_arm)
+  - src/fiberforce/reference/__init__.py (exports)
+  - examples/05_geometric_moment_arm_prototype.py (this demo, heavily expanded)
+
+Key functions:
+  estimate_bench_sternal_ma(anthro, grip_width, position)
+  estimate_squat_glute_ma(anthro, stance, variation, hip_flex, position)
+  estimate_squat_quad_ma(anthro, stance, knee_flex, variation)
+  estimate_moment_arm(lift, region, anthro, **params)
+  ref.estimate_moment_arm(...)  [via ReferenceData]
+  service.build_multi_position(...)   # v0.4
+  service.analyze_multi_position(...) # v0.4
+
+v0.4 MULTI-POSITION (LIMITED DYNAMIC) ADDITION (Part 6):
+  - Full demonstration of build_multi_position + position-aware builders
+    (squat bottom/mid/top with differentiated angles + geometric MA).
+  - Shows glute max demand change from bottom (high MA via 110° hip flex)
+    to top (low MA via 25° hip flex) using live geometric estimator.
+  - Uses both explicit position= loops and the high-level multi helpers.
+  - Includes ASCII force curve + high/low-bar cross check at multiple ROM points.
+  - This is the canonical runnable example for limited-dynamic questions.
+
+See the script source (especially Part 6) for the full multi-position
+workflow, quantitative deltas, visualizations, and interpretation.
+Complete model equations + limitations also in the printed sections above.

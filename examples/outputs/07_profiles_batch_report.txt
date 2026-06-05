@@ -1,0 +1,64 @@
+FiberForce Example 07 — Profiles + Batch Analysis Report
+Profile: example-athlete-2026
+Generated: 2026-06-03T20:59:06.869031
+Service: AnalysisService (FiberForce 0.5+ with 0.6 polish)
+  Calculator: SimplePeakForceCalculator
+  Reference: ReferenceData v0.2.2-phase4-multi-pos-geo-hardening — full confidence metadata on all tables (bench/squat/deadlift/ohp) + geometric MA preferred path when anthro provided. Lifts: bench, squat, deadlift, ohp. Geometric support: bench sternal + squat (glute/quad) + deadlift (glute/ham) + ohp (anterior + triceps; lateral via proxy)
+  Sensitivity (single + multi): Yes
+  Compare: Yes (routed through build+analyze)
+  Full lift parity: bench | squat | deadlift (conv+sumo) | ohp (standing/seated/strict + bottom/mid/lockout + multi-delt + triceps)
+  Multi-position: rich MultiPositionResult (aggregates, geo vs static, deltas); full duck-type compat with accumulators
+  Program-level accumulation: Yes (accumulate_regional_stress, accumulate_regional_volume, summarize_multi_position, summarize_regional_accumulation)
+  Persistence: Full via fiberforce.results + profiles (Saved*Run, profile-based multi-var)
+  CLI primary backend: Yes
+
+SAVED PROFILE MEASUREMENTS
+  humerus=34.0, forearm=26.5
+  biacromial=40.5, torso_depth=23.5
+  femur=44.5, tibia=38.5
+  biiliac=30.0
+
+BATCH RESULTS (full 4-lift parity via AnalysisService.build_position)
+  Bench Flat 105kg bottom                4114.2 N  conf=medium (reference data)
+  Bench Incline 30° 95kg bottom          4055.3 N  conf=medium (reference data)
+  Low-bar Squat 155kg bottom             5744.3 N  conf=high (user-influenced)
+  High-bar Squat 145kg bottom            4968.8 N  conf=high (user-influenced)
+  Conventional DL 175kg floor            8828.7 N  conf=high (user-influenced)
+  Sumo DL 175kg floor                    6829.7 N  conf=high (user-influenced)
+  Standing OHP 70kg bottom               2304.2 N  conf=medium (reference data)
+  Seated OHP 65kg mid (lateral delt)     1945.6 N  conf=medium (reference data)
+
+TOP DEMAND RANKING (your current personal setups)
+  1. Conventional DL 175kg floor         8828.7 N
+  2. Sumo DL 175kg floor                 6829.7 N
+  3. Low-bar Squat 155kg bottom          5744.3 N
+  4. High-bar Squat 145kg bottom         4968.8 N
+  5. Bench Flat 105kg bottom             4114.2 N
+  6. Bench Incline 30° 95kg bottom       4055.3 N
+
+DEADLIFT CONVENTIONAL vs SUMO COMPARISON (on your exact proportions)
+  conventional: 8828.7 N
+  sumo:   6829.7 N
+  Delta: -1999.1 N
+
+RECOMMENDED NEXT STEPS (real usage pattern)
+  1. Replace the synthetic numbers above with your actual measured values.
+  2. Save once: fiberforce profile save myname --femur XX --humerus YY ...
+  3. Run this script (or a derivative) weekly / before a training block.
+  4. Correlate the force deltas with real-world data (RPE, soreness by region,
+     progress on variations).
+  5. Layer in geometric MA (Example 05) + multi-var (Example 06) for deeper
+     personalization of the batch.
+
+PERSISTENCE NOTES
+  - Profiles live in ~/.fiberforce/profiles/<name>.json
+  - They contain only UserAnthropometry (easy to version control or backup).
+  - Future: full saved analysis results + LiftConfiguration objects alongside.
+
+See also:
+  - examples/01_program_level_insights.py (weekly accumulation)
+  - docs/advanced-patterns.md §4 (Persistence with Profiles + Batch Analysis)
+  - fiberforce profile --help (CLI surface over the same system)
+
+Relative deltas and rankings produced with your real measurements are the
+actionable output of FiberForce today.

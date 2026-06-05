@@ -1,0 +1,372 @@
+================================================================================
+FIBERFORCE v0.4 PUSH — BASELINE VERIFICATION REPORT
+Early 0.3.0-dev State (as of 2026-05-27 verification run)
+================================================================================
+
+WORKSPACE: /Volumes/Maximus/Maximus Prime/Workspace-Grok_Build/projects/fiberforce
+VERIFICATION AGENT: Dedicated Grok Build subagent (live execution heavy)
+DATE: 2026-05-27
+METHODOLOGY: Live execution of ALL examples (01-09), exact test cmd, exhaustive
+             Typer CliRunner + subprocess matrix, import smokes, file inspection,
+             version cross-checks. Brutally honest.
+
+================================================================================
+1. TEST SUITE RESULTS
+================================================================================
+
+Command executed: PYTHONPATH=src python3 -m pytest tests/ -q --tb=no
+
+Collection:
+  tests/test_geometric.py: 20
+  tests/test_models.py: 18
+  tests/test_persistence.py: 12
+  tests/test_sensitivity.py: 9
+  tests/test_service.py: 13
+  TOTAL: 72 tests
+
+Run result: ........................................................................ [100%]
+  - Passed: 72
+  - Failed: 0
+  - Errors: 0
+  - Skipped: 0
+  - Time: ~0.31s (0.26s user)
+
+Warnings observed: ONLY from external matplotlib site-packages
+  (PyparsingDeprecationWarning in _fontconfig_pattern.py — 14 instances).
+  ZERO warnings or deprecations from FiberForce source code or tests.
+
+Verdict: FULLY GREEN, fast, clean. Excellent test surface for 0.3.0-dev
+           (72 tests cover geometric, service, persistence, sensitivity, models).
+
+================================================================================
+2. EXAMPLE SCRIPTS EXECUTION SUMMARY (ALL 01-09)
+================================================================================
+
+All scripts executed live with:
+  cd /Volumes/Maximus/Maximus Prime/Workspace-Grok_Build/projects/fiberforce && PYTHONPATH=src MPLBACKEND=Agg python3 examples/XX.py
+  (headless matplotlib, full output captured, exit codes checked).
+
+Result: ALL 9 ran to completion with exit code 0. No crashes.
+
+- 01_program_level_insights.py: PASS. Weekly RSI sim across bench/squat/deadlift.
+  Side effects: Wrote examples/outputs/01_weekly_regional_stress_report.txt
+  Notes: One "error" case for deadlift lumbar (0.0N) handled gracefully in script.
+         Service describe reports "v0.2 wiring + v0.3 prep".
+
+- 02_personalization_anthropometry_study.py: PASS. Femur proxy study (high/low bar).
+  Side effects: Wrote 02_personalization_summary.txt
+  Notes: Correctly demonstrates current lack of auto geo personalization (forces
+         identical for avg vs long femur). Proxy logic runs but has no effect on
+         final forces in this version.
+
+- 03_sensitivity_grip_bench_pecs.py: PASS. Grip + angle sweeps on pecs.
+  Side effects: 03_bench_pecs_sensitivity_report.txt
+  Notes: Real discrete tables + continuous proxy. Good regional sternal/clav
+         comparisons.
+
+- 04_deadlift_vs_squat_posterior_chain.py: PASS. Flagship 4-var DL vs squat.
+  Side effects: 04_posterior_chain_comparison.txt
+  Notes: Full conv/sumo + high/low bar posterior ranking. Excellent demo of
+         deadlift first-class support.
+
+- 05_geometric_moment_arm_prototype.py: PASS. Core geo prototype deep dive.
+  Side effects: 05_geometric_moment_arm_report.txt
+  Notes: Detailed bench/squat estimators, limitations, trig heuristics. Prepares
+         Phase 2 work. No crashes.
+
+- 06_multi_variable_sensitivity.py: PASS. Multi-var + geo combo.
+  Side effects: 06_....txt
+  Notes: load x stance etc. with live geo rebuilds. Very small stance effect
+         observed on forces (prototype characteristic).
+
+- 07_persistence_profiles_and_batch.py: PASS. 4-lift batch on saved profile.
+  Side effects: Created ~/.fiberforce/profiles/example-athlete-2026.json +
+                many results in ~/.fiberforce/results/ + 07 report.
+  Notes: Full parity (incl. OHP standing/seated). Listed pre-existing profiles
+         from prior runs in this env.
+
+- 08_profile_persistence_workflows.py: PASS (with minor internal hiccup).
+  Side effects: Multiple Saved*Run JSONs (analyses, sensitivities, comparisons)
+                under ~/.fiberforce/results/ + profile. 08 report.
+  Notes: Full SavedAnalysisRun / SavedSensitivityRun (multi-var) / SavedCompareRun
+         roundtrips. One "Sensitivity run ... not found or corrupt" logged during
+         discovery (non-fatal, script completed cleanly). Heavy use of
+         run_profile_* helpers + geo-aware rebuilds.
+
+- 09_geometric_multi_var_persistence.py: PASS. Flagship static-vs-geo + persistence.
+  Side effects: geo-optimizer-athlete-2026 profile + multiple persisted sens runs
+                (bench load×grip static/geo, squat load×stance geo via helper).
+  Notes: Explicit side-by-side static table vs geometric MA surfaces on same
+         profile. Post-hoc loading of saved runs for delta analysis. Pinnacle
+         current workflow.
+
+All reports present in examples/outputs/ (9 files, confirmed post-execution).
+
+Common observations across examples:
+- Consistent "v0.2 wiring + v0.3 prep" in service.describe().
+- Known limitations sections repeated (force ~100x low due to cm-vs-m bug in
+  calculations/peak_force.py; static positions only; geo prototype limited to
+  bench sternal + squat glute/quad; etc.).
+- All use AnalysisService as primary API.
+- Heavy side effects on ~/.fiberforce/ (expected for persistence demos).
+- No Python exceptions or crashes. Some scripts print educational "error" cases
+  gracefully.
+
+Verdict: Examples are production-quality demos and all executable. Excellent
+          baseline for Phase 2 (limited dynamics / program level).
+
+================================================================================
+3. CLI MATRIX — EXHAUSTIVE COVERAGE (Typer CliRunner + python -m)
+================================================================================
+
+Tool: typer.testing.CliRunner (primary, isolated) + python3 -m fiberforce.cli
+      (subprocess smoke). All 4 lifts exercised (bench/squat/deadlift/ohp +
+      variations: flat/high_bar/low_bar/conventional/sumo/standing/seated).
+
+TOP-LEVEL COMMANDS EXERCISED:
+- fiberforce --help : PASS (lists analyze, sensitivity, compare, visualize,
+  sensitivity-multi, profile)
+- analyze (all lifts + key variations + targets): PASS. Clean output for bench,
+  squat (high/low), deadlift (conv/sumo), ohp (standing + seated + multi-head
+  targets). Uses service.build_position + analyze exclusively.
+- sensitivity --help : PASS
+- sensitivity <lift> ... (bench/squat/deadlift/ohp, load_kg sweeps): **ALL FAIL**
+  Error: 'ReferenceData' object has no attribute 'get_all_regions'
+  (See Issues section)
+- sensitivity-multi --help : PASS
+- sensitivity-multi <lift> (e.g. squat load x stance with --use-geometric):
+  **FAILS** with same ReferenceData error.
+- compare --help : PASS
+- compare <lift> --a/--b (squat high vs low; deadlift conv vs sumo): PARTIAL.
+  Executes but produces 0.0 N forces + empty deltas for non-bench (default
+  target="Sternal fibers" never matches glute/erector etc. regions).
+- visualize --help + basic: PASS (but command body is a placeholder directing
+  user to --plot on other commands).
+- deadlift / ohp (dedicated top-level per CHANGES.md): **DO NOT EXIST**
+  "No such command 'deadlift'." / "ohp". Exit 2. Major drift.
+
+PROFILE SUBCOMMAND TREE (full, multi-lift, enhanced persistence):
+- profile --help / list / save / load : PASS (save created cli-matrix-athlete
+  with real anthro; list shows 10+ profiles from examples + prior).
+- profile run <profile> --lift <all 4 lifts + variations>: PASS. Full 4-lift
+  execution from persisted anthropometry.
+- profile save-config : **CRASH** — NameError: name 'LiftConfiguration' is not
+  defined (missing import in cli.py: from fiberforce.models import ... only
+  Subject/JointAngles/ExternalLoad; LiftConfiguration lives in models.lift).
+- profile save-result : PASS (persisted analysis run).
+- profile list-results : PASS (shows saved runs).
+- profile multi-sens <profile> --variables "..." --lift <squat etc.>: PASS.
+  Full SavedSensitivityRun + geo-capable. Different (working) code path.
+- profile compare-runs / load-result : PARTIAL. Some name/path mismatches
+  between save-result and loader (e.g. run_id vs filename stem); "not found"
+  errors in certain flows. Non-fatal for basic use.
+
+Subprocess (python3 -m fiberforce.cli --help): Confirms same command surface.
+
+Overall CLI coverage: ~70% functional for core analyze/profile-run/multi-sens.
+         Sensitivity + compare + save-config + dedicated lift cmds broken or
+         missing. Visualization thin.
+
+================================================================================
+4. VERSION CONSISTENCY + IMPORT / RUNTIME DRIFT CHECKS
+================================================================================
+
+- pyproject.toml: version = "0.3.0-dev" (line 3)
+- src/fiberforce/__init__.py: __version__ = "0.3.0-dev" (line 19)
+  + Extensive comment block documenting 0.3.0-dev state (72 tests, 08/09
+    examples, geometric 4-lift, CLI multi-var polish, version alignment).
+- Other: [tool.briefcase] version="0.1.0" (GUI packaging, unrelated/legacy).
+- No other __version__ or conflicting strings in src/.
+
+Runtime:
+- `import fiberforce; fiberforce.__version__` → "0.3.0-dev" (clean).
+- All core imports succeed: models, calculations, analysis, profiles, cli,
+  visualization, examples, reference, AnalysisService, etc.
+- `from fiberforce.cli import app` succeeds at import time (NameError only
+  surfaces at runtime on save-config path).
+- Service.describe() consistently returns "FiberForce v0.2 wiring + v0.3 prep"
+  and "Reference: ReferenceData v0.2.1-..." — minor docstring / string drift
+  from 0.3.0-dev labeling (not fatal).
+- No other import errors, circular import issues, or obvious runtime drift
+  detected in smokes or example/CLI execution.
+- Matplotlib / viz optional; ASCII fallbacks work when headless or unavailable.
+- Typer[all] + rich present in env for full help/UX.
+
+Verdict: Versions aligned. No major packaging/import rot. Minor string drift only.
+
+================================================================================
+5. ISSUES FOUND (BRUTALLY HONEST — ALL SEVERITY)
+================================================================================
+
+**CRITICAL / BLOCKING FOR RELIABLE USE (must fix before Phase 2 or 0.3 stable):**
+
+1. **CLI sensitivity + sensitivity-multi completely broken** (AttributeError on
+   every invocation):
+   cli.py:169 and :536: service.get_reference().get_all_regions()
+   ReferenceData has no such method (it has list_available_lifts(),
+   list_available_regions_for_lift(), estimate_moment_arm(), etc.).
+   Fallback to KNOWN_MUSCLE_REGIONS is unreachable. Direct service.sensitivity()
+   works fine; this is purely CLI wrapper bug (copy-paste from wrong object).
+   Impact: sensitivity-multi (flagship multi-var + geo feature) unusable via CLI.
+
+2. **Missing import in cli.py → profile save-config crashes hard**:
+   Line 314: LiftConfiguration(...) but import at top is only
+   "from fiberforce.models import Subject, JointAngles, ExternalLoad"
+   (LiftConfiguration is in models.lift and re-exported in models/__init__.py).
+   Impact: One entire enhanced persistence subcommand unusable.
+
+3. **Dedicated `fiberforce deadlift` and `fiberforce ohp` commands do not exist**:
+   Heavily advertised in CHANGES.md ("New dedicated first-class commands"),
+   docs, GAMEPLANS, etc. Current surface only has generic analyze/sensitivity
+   with lift arg + profile run. No @app.command("deadlift") etc. in cli.py.
+   Impact: Documentation lies; user confusion; feature incomplete from "wiring"
+   phase.
+
+4. **compare command produces useless 0.0 results for non-bench lifts**:
+   Default --target "Sternal fibers" (CLI line ~200) never matches glute/upper
+   fibers etc. in analyze results → force_a/b = 0.0, empty deltas.
+   Service.compare itself works when correct target/region passed.
+   Impact: CLI compare only reliable for bench.
+
+**MODERATE / ANNOYING:**
+
+5. **profile compare-runs / load-result have flaky discovery**:
+   Naming conventions between save-result (run_id based) and the loader
+   candidates + list_saved_runs don't always align in matrix runs. Some
+   "not found" even when list-results shows the name. (Examples 08/09 also
+   hit similar during their internal discovery.)
+
+6. **analyze / sensitivity CLI always echo the requested --target even if the
+   actual result region differs** (e.g., deadlift analyze reporting "Sternal
+   fibers" in some matrix outputs while computing glute). Cosmetic + confusing.
+
+7. **Service.describe() and some example banners still say "v0.2 wiring + v0.3
+   prep" and ReferenceData version "0.2.1-..."** — minor labeling drift now
+   that we are in 0.3.0-dev.
+
+**MINOR / KNOWN (not new):**
+
+8. Absolute force scaling bug (~100x low, cm vs m in peak_force.py) — documented
+   everywhere, examples/tests all call it out. Relative trends trustworthy.
+9. Geometric prototype limited (bench/squat only certain regions; others fall
+   back). Expected pre-Phase 2.
+10. Many pre-existing profiles/results left in ~/.fiberforce/ from examples
+    (side effect of persistence demos; not a code bug).
+11. One-off 0.0N "error" case in ex01 for deadlift lumbar (handled).
+12. No deprecation warnings in our code; only matplotlib upstream.
+
+No other crashes, import failures, or obvious rot found in 100+ live invocations.
+
+================================================================================
+6. RECOMMENDATIONS BEFORE STARTING PHASE 2 (LIMITED DYNAMICS + PROGRAM LEVEL)
+================================================================================
+
+MUST-DO (high confidence these will bite multi-position / program work):
+
+- Fix #1 (CLI sensitivity): Replace the two .get_all_regions() calls with
+  proper lookup, e.g.:
+    from fiberforce.reference import KNOWN_MUSCLE_REGIONS
+    target_region = next((r for r in KNOWN_MUSCLE_REGIONS if ...), ...)
+  Or add a thin get_all_regions() / get_regions() to ReferenceData for
+  symmetry. Then re-enable the fallback logic or remove dead code.
+  (This also affects sensitivity-multi path.)
+
+- Fix #2: Add LiftConfiguration to the models import in cli.py (or use
+  from fiberforce.models.lift import ...). Test save-config end-to-end.
+
+- Fix #3: Either implement the dedicated deadlift/ohp commands (thin wrappers
+  around analyze/sensitivity with lift prefilled + lift-specific help) as
+  promised in CHANGES, OR scrub all references from docs/CHANGES/GAMEPLANS/
+  CURRENT_CAPABILITIES.md etc. Do not ship 0.3 with lying docs.
+
+- Fix #4: Make --target default smarter per-lift in CLI (or always require it,
+  or use service logic to pick sensible default region for the lift). At
+  minimum, document or auto-detect.
+
+- Audit all CLI paths that call service.get_reference() for similar API
+  mismatches (compare and service itself already use KNOWN_MUSCLE_REGIONS
+  correctly in other places).
+
+- Clean up service.describe() and any "v0.2" strings to "0.3.0-dev" or remove
+  version strings from runtime banners if they are maintenance burden.
+
+- Consider a small CLI integration test (using CliRunner) in tests/ that
+  exercises sensitivity, compare, and profile save-config to prevent
+  regression (current tests appear to focus on service layer).
+
+- Before Phase 2 (program-level accumulation across positions/sets/reps + any
+  limited dynamics): Ensure all high-level entry points (CLI + examples + lib
+  API) are consistent. Program work will multiply calls to analyze/sensitivity
+  and will surface the broken sensitivity CLI and compare defaults immediately.
+
+NICE-TO-HAVE / POLISH:
+
+- Make compare default target lift-aware (e.g. "Upper fibers" for squat/DL/ohp).
+- Improve saved run naming / discovery robustness in results.py + profile cmds
+  (add stricter IDs, better listing).
+- Add a `fiberforce --version` (easy Typer addition) that prints
+  fiberforce.__version__.
+- Consider a `fiberforce demo` or `fiberforce examples` meta-command, or at
+  least update READMEs to emphasize `python examples/09_...` over CLI for
+  advanced geo+multi-var workflows (since CLI is currently incomplete for them).
+- After fixes, re-run this exact verification matrix + examples as a gate.
+
+POST-FIX VERIFICATION SUGGESTION:
+  Re-execute the exact commands in this report + full pytest + all 9 examples.
+  Target: zero FAILs in CLI matrix for the exercised paths.
+
+================================================================================
+7. OVERALL BASELINE VERDICT
+================================================================================
+
+**STRENGTHS (rock-solid):**
+- 72/72 tests green, fast, broad coverage (geometric, persistence, service,
+  sensitivity core, models).
+- All 9 examples fully executable, self-documenting, write high-quality reports,
+  demonstrate the full intended 0.3 surface (AnalysisService + geo + multi-var
+  + complete persistence).
+- Core library (AnalysisService, builders with use_geometric, profiles/results
+  layer, reference + geometric estimators) is mature and usable from Python.
+- Version alignment clean.
+- No import rot, no crashes in happy paths for analyze/profile-run/examples.
+- Excellent documentation (docs/, example headers, limitations honesty).
+
+**WEAKNESSES (current state is "early 0.3.0-dev" not "shippable 0.3"):**
+- CLI is incomplete/broken on several flagship commands (sensitivity family,
+  save-config, dedicated lift cmds, compare for lower body).
+- Documentation over-promised on CLI surface (deadlift/ohp commands).
+- Some API mismatches between CLI glue and the polished service/reference layer
+  (the get_all_regions bug is the clearest symptom of rushed wiring).
+- Minor drift in banners/strings.
+
+**FOR v0.4 PUSH (Phase 2 limited dynamics + program level):**
+This is a **strong but not pristine baseline**. The architecture (AnalysisService
+as single source of truth) is correct and ready for extension. The test + example
+surface gives high confidence in the model.
+
+**Recommendation: Do 1-2 days of targeted bugfix + doc scrub on the 4 critical
+CLI issues above, then re-verify with this exact harness. After that, Phase 2
+(multi-position accumulation, limited time/velocity dynamics on top of the
+existing static peak force engine, program-level RSI extensions) can proceed
+with low risk of fighting broken plumbing.**
+
+The foundation for "program level" (batching many positions, accumulating
+regional stress, what-if programming) is already exercised beautifully in
+examples 01/07/08/09. Fixing the CLI wrapper bugs will make the whole tool
+usable end-to-end for the next wave.
+
+================================================================================
+FILES CREATED / ARTIFACTS
+================================================================================
+
+- /Volumes/Maximus/Maximus Prime/Workspace-Grok_Build/projects/fiberforce/BASELINE_VERIFICATION_REPORT.txt (this file)
+- (No other files created by this verification; all runs used existing scripts/
+  infrastructure. ~/.fiberforce/ received additional test profiles/runs as
+  side-effect of examples 07-09 + CLI matrix — expected and documented.)
+
+All live execution logs, stdout captures, and intermediate findings are in the
+agent conversation history.
+
+================================================================================
+END OF REPORT — Honest baseline for v0.4 push.
+================================================================================

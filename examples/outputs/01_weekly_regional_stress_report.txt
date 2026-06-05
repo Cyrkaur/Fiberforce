@@ -1,0 +1,71 @@
+FiberForce — Weekly Regional Stress Report (Synthetic Program)
+============================================================
+
+v0.5: Generated using TrainingSession + WeeklyProgram models (Phase 3)
+All accumulation via AnalysisService.accumulate_* helpers.
+
+Gluteus Maximus::Upper fibers: 31945.1 RSI units (5 sessions)
+Pectoralis Major::Sternal fibers: 11261.7 RSI units (5 sessions)
+Erector Spinae::Lumbar: 0.0 RSI units (5 sessions)
+
+Recommendations:
+• HIGH DEMAND on Pectoralis Major::Sternal fibers (RSI 11262, 35% of peak). Consider: (a) adding a variation that reduces its moment arm (e.g. more incline for sternal pecs), (b) rotating in a lighter technique day, or (c) monitoring recovery closely.
+• HIGH DEMAND on Gluteus Maximus::Upper fibers (RSI 31945, 100% of peak). Consider: (a) adding a variation that reduces its moment arm (e.g. more incline for sternal pecs), (b) rotating in a lighter technique day, or (c) monitoring recovery closely.
+• LOWER on Erector Spinae::Lumbar (0% of peak). Opportunity to add targeted volume or a specific variation if that region is a priority for your goals.
+
+--- Full WeeklyProgram.generate_simple_report() ---
+WeeklyProgram Report: Intermediate Lifter Synthetic Week (v0.5)
+Athlete: Intermediate Lifter (Synthetic)
+Week: 2026-W22
+Sessions: 5 | Total analyses: 10
+
+Top Regional Torque Demand (ft-lb accumulated proxy):
+  Gluteus Maximus::Upper fibers     31945.1
+  Pectoralis Major::Sternal fibers    11261.7
+  Erector Spinae::Lumbar                0.0
+  TOTAL                             43206.8
+
+Total volume-stress proxy: 43206.8
+
+Highest stressed region: Gluteus Maximus::Upper fibers
+
+Per-session highlights:
+  - Mon Session: 2 analyses, top=Pectoralis Major::Sternal fibers
+  - Tue Session: 3 analyses, top=Gluteus Maximus::Upper fibers
+  - Thu Session: 2 analyses, top=Gluteus Maximus::Upper fibers
+  - Fri Session: 1 analyses, top=Pectoralis Major::Sternal fibers
+  - Sat Session: 2 analyses, top=Gluteus Maximus::Upper fibers
+
+Regional distribution (ASCII):
+  Gluteus Maximus::Upper fibers │████████████████████████████│ 31945.1 stress
+  Pectoralis Major::Sternal fibers │█████████                   │ 11261.7 stress
+  Erector Spinae::Lumbar │                            │     0.0 stress
+                 └────────────────────────────┘  range: 0.0–31945.1 stress
+
+Notes: Demonstration of TrainingSession/WeeklyProgram with mixed lifts + multi-position data paths.
+
+Interpretation & Usage Notes (v1 units: imperial / ft-lbs torque):
+  • Regional 'stress' values are accumulated peak *torque demand* proxies (ft-lb × weighting).
+    (Converted from internal Nm using standard factor; compare relatively within athlete.)
+    Higher values mean the model estimates greater mechanical demand on that region
+    across the included analyses/positions. Compare relative to the same athlete's
+    other sessions or programs — absolute numbers are best treated as directional.
+  • Multi-position data (bottom/mid/top) contributes more granular load than single-position
+    snapshots. A week heavy on 3-position squat work will naturally show different
+    regional distribution than a week using only mid-thigh pin pulls.
+  • Geometric moment-arm data (when UserAnthropometry was supplied) is used where
+    available. Check individual AnalysisResult notes or MultiPositionResult summaries
+    for 'geometric' vs 'reference table' provenance on specific lifts.
+  • Top stressed region is useful for programming emphasis decisions (e.g., 'this
+    low-bar week loaded glutes ~X% more than the high-bar week for this lifter').
+    Use individual result.peak_torque_ftlb for exact ft-lbs torque at joint.
+  • Measurements default to inches/ft/lbs in v1; forces/torques reported in ft-lbs.
+  • These numbers intentionally ignore recovery, sleep, nutrition, joint tolerance,
+    and technique. They are one mechanical data layer to combine with real-world
+    athlete feedback, not a complete training prescription system.
+
+(Computed via AnalysisService accumulation helpers + real reference data + geometric estimators)
+Strong recommendation: Use for relative comparisons within one athlete across variations,
+not for cross-athlete or absolute 'volume prescriptions'.
+
+Generated with real reference moment arms via AnalysisService + v0.5 program models.

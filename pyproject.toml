@@ -1,0 +1,140 @@
+[project]
+name = "fiberforce"
+version = "2.0.0"
+description = "Personalized biomechanical modeling for regional hypertrophy and force analysis in primary lifts. v2.0: Full native macOS .app (double-click the icon in Finder/Applications/Launchpad; DMG installer). Imperial (inches, ft, lbs) measurements + ft-lb torque outputs by default. Full native GUI (clickable app primary), library, and CLI with recipes, multi-position + continuous ROM (dynrom), sensitivity, programs, geometric, and rich interpretations."
+authors = [{ name = "User + Grok Build" }]
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.9"
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Healthcare Industry",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Physics",
+    "Topic :: Scientific/Engineering :: Visualization",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+dependencies = [
+    "typer>=0.12.0",
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "coverage[toml]>=7.0",
+]
+dev = [
+    "ruff>=0.4.0",
+    "mypy>=1.0",
+    "pre-commit>=3.0",
+]
+viz = [
+    "matplotlib>=3.5",
+]
+
+gui = [
+    "PySide6>=6.6",
+]
+
+[project.scripts]
+fiberforce = "fiberforce.cli:app"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/fiberforce"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py39"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+pythonpath = ["src"]
+addopts = "-q --tb=short"
+
+[tool.coverage.run]
+source = ["src/fiberforce"]
+branch = true
+omit = [
+    "*/tests/*",
+    "*/__pycache__/*",
+    "*/site-packages/*",
+]
+
+[tool.coverage.report]
+skip_covered = true
+show_missing = true
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if TYPE_CHECKING:",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "@overload",
+]
+
+[tool.briefcase]
+project_name = "FiberForce"
+bundle = "com.fiberforce"
+version = "2.0.0"
+description = "FiberForce v2.0 — the clickable native macOS app (double-click icon, DMG). Personalized biomechanical modeling, imperial + ft-lb torque, full GUI with continuous ROM."
+# sources at top level removed to avoid briefcase duplicate package name error with the app section.
+requires = ["PySide6"]
+
+[tool.briefcase.app.fiberforce]
+formal_name = "FiberForce"
+description = "FiberForce v2.0 — Personalized force modeling for serious lifters. Build once, double-click the icon (DMG provided). Inches/ft/lbs + ft-lb torque + top-tier visuals + dynrom curves."
+# Dual assets: app_icon.jpg for runtime QIcon/splash (works inside bundle), app_icon.icns for the macOS .app bundle icon (Finder/Dock).
+# We commit the generated .icns (produced from the 1024x1024 jpg via sips+iconutil in the build script).
+# Briefcase will pick up the .icns when icon points to the base name (or we can point to the .icns explicitly).
+icon = "src/fiberforce/gui/assets/app_icon"
+sources = ["src/fiberforce"]
+requires = ["PySide6", "std-nslog"]
+# Explicit main module for the bundle launcher. This makes the .app binary
+# run the GUI on launch. We also provide src/fiberforce/__main__.py so that
+# `python -m fiberforce` launches the GUI (used by the stub + for convenience).
+main_module = "fiberforce.__main__:main"
+
+[tool.coverage.html]
+directory = "htmlcov"
+
+[tool.mypy]
+python_version = "3.9"
+files = ["src/fiberforce"]
+ignore_missing_imports = true
+warn_return_any = false
+warn_unused_ignores = true
+show_error_codes = true
+pretty = true
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+no_implicit_optional = false
+strict_optional = true
+# Reasonable strictness focused on src/; overly noisy modules temporarily ignored
+# until type annotations / refactors are added. Overall mypy adoption is encouraged.
+
+[[tool.mypy.overrides]]
+module = "fiberforce.reference.data"
+ignore_errors = true
+
+[[tool.mypy.overrides]]
+module = "fiberforce.calculations.base"
+ignore_errors = true
+
+[[tool.mypy.overrides]]
+module = "fiberforce.analysis.service"
+ignore_errors = true

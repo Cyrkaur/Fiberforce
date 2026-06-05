@@ -1,0 +1,3 @@
+FiberForce Bench Sensitivity Study — Sternal vs Clavicular
+Grip and angle sweeps using real reference + documented synthesis.
+See script for full tables and methodology.

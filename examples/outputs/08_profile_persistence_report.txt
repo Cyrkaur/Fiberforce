@@ -1,0 +1,61 @@
+FiberForce Example 08 — Profile + Full Enhanced Persistence Report
+Profile: advanced-persist-athlete-2026
+Generated: 2026-06-03T20:59:07.043195
+Service: AnalysisService (FiberForce 0.5+ with 0.6 polish)
+  Calculator: SimplePeakForceCalculator
+  Reference: ReferenceData v0.2.2-phase4-multi-pos-geo-hardening — full confidence metadata on all tables (bench/squat/deadlift/ohp) + geometric MA preferred path when anthro provided. Lifts: bench, squat, deadlift, ohp. Geometric support: bench sternal + squat (glute/quad) + deadlift (glute/ham) + ohp (anterior + triceps; lateral via proxy)
+  Sensitivity (single + multi): Yes
+  Compare: Yes (routed through build+analyze)
+  Full lift parity: bench | squat | deadlift (conv+sumo) | ohp (standing/seated/strict + bottom/mid/lockout + multi-delt + triceps)
+  Multi-position: rich MultiPositionResult (aggregates, geo vs static, deltas); full duck-type compat with accumulators
+  Program-level accumulation: Yes (accumulate_regional_stress, accumulate_regional_volume, summarize_multi_position, summarize_regional_accumulation)
+  Persistence: Full via fiberforce.results + profiles (Saved*Run, profile-based multi-var)
+  CLI primary backend: Yes
+
+RICH PROFILE MEASUREMENTS USED (these drive geometric estimators)
+  humerus_length_cm: 34.2
+  forearm_length_cm: 26.8
+  biacromial_width_cm: 41.0
+  torso_depth_at_chest_cm: 22.8
+  femur_length_cm: 45.0
+  tibia_length_cm: 39.2
+  biiliac_width_cm: 29.5
+
+PERSISTED ARTIFACTS CREATED IN THIS RUN
+  - SavedAnalysisRun (bench geometric): advanced-persist-athlete-2026_bench_110kg_sternal_geo
+  - SavedSensitivityRun (multi-var + geo rebuild): advanced-persist-athlete-2026_multi_squat_load_kg,stance_width_cm_20260603_2059
+  - Additional runs via run_profile_* helpers and save_current_analysis
+
+KEY DEMONSTRATED PATTERNS
+  1. service.save_current_analysis(subject, pos_with_use_geometric=True)
+  2. run_profile_multi_sensitivity(..., rebuild_multi=geo_aware_rebuild)
+     → The rebuild uses the modern build_position(use_geometric=True, stance=...)
+     → Real femur/tibia + variable stance produce fresh glute MA on every point
+  3. Full round-tripping: save → list_saved_runs → load_*_run
+  4. save_profile_with_run and list_all_for_profile for archive hygiene
+  5. run_profile_compare + run_profile_analysis as zero-boilerplate persisted workflows
+
+NEXT STEPS FOR REAL USE
+  - Replace RICH_ATHRO with your actual measured values (or load an existing profile).
+  - Extend the multi-var variables and rebuild to explore grip/stance/load interactions
+    on *your* skeleton (bench + squat are the best-supported for geometric today).
+  - Add your own tags (e.g. ['post-deload', 'RPE-8']) and notes with training context.
+  - Write a small wrapper that runs this weekly and appends to a master report.
+  - Use the loaded SavedSensitivityRun.points to feed pandas/seaborn for 2D surfaces
+    (the data model already gives you everything you need).
+
+PERSISTENCE IMPLEMENTATION NOTES
+  - All artifacts live under ~/.fiberforce/results/{analyses,sensitivities,comparisons}/
+  - Human-readable JSON with explicit __type__ tags for robust reconstruction.
+  - Profile name is the natural foreign key linking anthropometry ↔ results.
+  - The layer was designed so that future additions (program accumulation,
+    dynamic ROM exports, etc.) can attach to the same Saved*Run objects.
+
+See also:
+  - examples/07_persistence_profiles_and_batch.py (the anthropometry-only predecessor)
+  - examples/09_geometric_multi_var_persistence.py (deeper combined geo+multi-var focus)
+  - docs/advanced-patterns.md (now updated with full persistence recipes)
+  - src/fiberforce/results.py and src/fiberforce/analysis/service.py
+
+All relative trends, interaction effects, and deltas from persisted runs are
+meaningful today. Absolute force values should be interpreted directionally only.

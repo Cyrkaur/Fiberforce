@@ -1,0 +1,5 @@
+FiberForce Personalization Study Summary
+Average femur forces (high/low bar): 5003.1 / 5487.8 N
+Long femur (current model): identical
+Proxy long-femur high-bar force at ratio 1.19: 5584.2 N
+See full script output and comments for methodology.

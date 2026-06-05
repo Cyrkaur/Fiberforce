@@ -1,0 +1,18 @@
+FiberForce Example 12 Report — 2026-06-03T22:10:48.928167
+============================================================
+
+SQUAT CONTINUOUS:
+Multi-position analysis for squat (low_bar) @ 142.8816kg targeting 'Sternal fibers' across 5 positions (knee=35°, knee=69°, knee=102°, knee=136°, knee=170°).
+  • Extremely flat force profile across the tested positions.
+  • Static reference tables only (no personal anthropometry applied to moment arms).
+  • This data shows how stress on the target changes with position — useful for choosing exercise variations or emphasis points (e.g. pause reps, partials, or stance tweaks).
+    Always combine with technique quality, joint comfort, and actual performance data before making training changes.
+
+BENCH CONTINUOUS (truncated):
+Multi-position analysis for bench (flat) @ 102.0583kg targeting 'Sternal fibers' across 4 positions (shoulder=60°, shoulder=47°, shoulder=33°, shoulder=20°).
+  • Extremely flat force profile across the tested positions.
+  • Static reference tables only (no personal anthropometry applied to moment arms).
+  • This data shows how stress on the target changes with position — useful for choosing exercise variations or emphasis points (e.g. pause reps, partials, or stance tweaks).
+    Always combine with technique quality, joint comfort, and actual performance data before making training changes....
+
+See source for more. This demonstrates post-v1 continuous ROM MVP.

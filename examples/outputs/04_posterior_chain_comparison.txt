@@ -1,0 +1,22 @@
+FiberForce Deadlift vs Squat Posterior Chain Comparison
+Load: 150.0 kg | Subject: Posterior Chain Deadlift Example Subject
+
+GLUTE UPPER
+  DL Conventional: 7891.85 N
+  DL Sumo: 6105.02 N
+  Squat Low-bar: 5879.71 N
+  Squat High-bar: 5360.46 N
+
+HAMSTRINGS
+  Squat High-bar: 0.00 N
+  Squat Low-bar: 0.00 N
+  DL Conventional: 0.00 N
+  DL Sumo: 0.00 N
+
+ERECTOR LUMBAR
+  Squat High-bar: 0.00 N
+  Squat Low-bar: 0.00 N
+  DL Conventional: 0.00 N
+  DL Sumo: 0.00 N
+
+Generated live via AnalysisService + real builders.
